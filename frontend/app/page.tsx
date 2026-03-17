@@ -10,20 +10,28 @@ import ConfirmModal from "../components/ConfirmModal";
 import Loader from "../components/Loader";
 import { toast, Toaster } from "react-hot-toast";
 
+interface LinkType {
+  _id: string;
+  title: string;
+  description: string;
+  url: string;
+  category: string;
+}
+
 export default function Home() {
   const { data: session, status } = useSession();
-  const [links, setLinks] = useState([]);
+  const [links, setLinks] = useState<LinkType[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [open, setOpen] = useState(false);
-  const [editData, setEditData] = useState(null);
-  const [deleteItem, setDeleteItem] = useState(null);
+  const [editData, setEditData] = useState<LinkType | null>(null);
+  const [deleteItem, setDeleteItem] = useState<LinkType | null>(null);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchLinks = async () => {
     try {
-      const res = await axios.get(
+      const res = await axios.get<LinkType[]>(
         `/links?search=${search}&category=${category === "All" ? "" : category}`
       );
       setLinks(res.data);
@@ -35,6 +43,7 @@ export default function Home() {
   };
 
   const deleteLink = async () => {
+    if (!deleteItem) return;
     try {
       await axios.delete(`/links/${deleteItem._id}`);
       toast.success("Link removed");
@@ -69,16 +78,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Toaster position="bottom-center" />
-      
       <Navbar 
         search={search} 
         setSearch={setSearch} 
         onLogoutClick={() => setLogoutConfirm(true)} 
       />
-      
       <main className="max-w-7xl mx-auto px-4 py-6">
         <FilterBar selected={category} setSelected={setCategory} />
-
         {loading ? (
           <div className="py-20"><Loader /></div>
         ) : (
@@ -88,27 +94,24 @@ export default function Home() {
                 key={link._id}
                 link={link}
                 onDelete={() => setDeleteItem(link)}
-                onEdit={(l) => { setEditData(l); setOpen(true); }}
+                onEdit={(l: LinkType) => { setEditData(l); setOpen(true); }}
               />
             ))}
           </div>
         )}
       </main>
-
       <button
         onClick={() => { setEditData(null); setOpen(true); }}
         className="fixed bottom-8 right-8 w-16 h-16 bg-indigo-600 text-white rounded-2xl shadow-2xl shadow-indigo-300 flex items-center justify-center text-3xl hover:rotate-90 transition-transform active:scale-90"
       >
         +
       </button>
-
       <AddLinkModal
         open={open}
         setOpen={setOpen}
         refresh={fetchLinks}
         editData={editData}
       />
-
       <ConfirmModal
         open={!!deleteItem}
         onClose={() => setDeleteItem(null)}
@@ -118,7 +121,6 @@ export default function Home() {
         confirmText="Delete"
         type="danger"
       />
-
       <ConfirmModal
         open={logoutConfirm}
         onClose={() => setLogoutConfirm(false)}
