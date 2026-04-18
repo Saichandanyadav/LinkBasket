@@ -62,12 +62,12 @@ export default function Home() {
 
   if (!session) {
     return (
-      <div className="h-screen flex flex-col justify-center items-center bg-white text-gray-900 p-6">
-        <h1 className="text-7xl font-black mb-4 tracking-tighter text-indigo-600">LinkBasket</h1>
-        <p className="text-xl text-gray-400 mb-8 font-medium">Your digital library, simplified.</p>
+      <div className="min-h-screen flex flex-col justify-center items-center px-6 text-center bg-white">
+        <h1 className="text-5xl sm:text-6xl font-black text-indigo-600 mb-3">LinkBasket</h1>
+        <p className="text-gray-500 text-base sm:text-lg mb-6">Your digital library, simplified.</p>
         <button
           onClick={() => signIn("google")}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl shadow-indigo-200 transition-all hover:scale-105"
+          className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg active:scale-95"
         >
           Get Started
         </button>
@@ -78,40 +78,57 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Toaster position="bottom-center" />
-      <Navbar 
-        search={search} 
-        setSearch={setSearch} 
-        onLogoutClick={() => setLogoutConfirm(true)} 
+      <Navbar
+        search={search}
+        setSearch={setSearch}
+        onLogoutClick={() => setLogoutConfirm(true)}
       />
-      <main className="max-w-7xl mx-auto px-4 py-6">
+
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <FilterBar selected={category} setSelected={setCategory} />
+
         {loading ? (
-          <div className="py-20"><Loader /></div>
+          <div className="py-16">
+            <Loader />
+          </div>
+        ) : links.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+              No links found
+            </h2>
+            <p className="text-gray-500 text-sm sm:text-base">
+              Start by adding your first link
+            </p>
+          </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
             {links.map((link) => (
               <LinkCard
                 key={link._id}
                 link={link}
                 onDelete={() => setDeleteItem(link)}
-                onEdit={(l: LinkType) => { setEditData(l); setOpen(true); }}
+                onEdit={(l: LinkType) => {
+                  setEditData(l);
+                  setOpen(true);
+                }}
               />
             ))}
           </div>
         )}
       </main>
+
       <button
-        onClick={() => { setEditData(null); setOpen(true); }}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-indigo-600 text-white rounded-2xl shadow-2xl shadow-indigo-300 flex items-center justify-center text-3xl hover:rotate-90 transition-transform active:scale-90"
+        onClick={() => {
+          setEditData(null);
+          setOpen(true);
+        }}
+        className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 bg-indigo-600 text-white rounded-full shadow-xl flex items-center justify-center text-3xl active:scale-90"
       >
         +
       </button>
-      <AddLinkModal
-        open={open}
-        setOpen={setOpen}
-        refresh={fetchLinks}
-        editData={editData}
-      />
+
+      <AddLinkModal open={open} setOpen={setOpen} refresh={fetchLinks} editData={editData} />
+
       <ConfirmModal
         open={!!deleteItem}
         onClose={() => setDeleteItem(null)}
@@ -121,6 +138,7 @@ export default function Home() {
         confirmText="Delete"
         type="danger"
       />
+
       <ConfirmModal
         open={logoutConfirm}
         onClose={() => setLogoutConfirm(false)}
